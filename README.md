@@ -47,6 +47,27 @@ By default, Eclipse generates project structures that match with your platform's
 
 This repository is configured (and assumes) UTF-8 encoded source files, in both Eclipse and Maven. If you mix up encodings, you may notice unformatted output produced by your generators (this does not generate a compile error or warning). Depending on your setup, you can use command line tools such as `iconv` to convert encodings (e.g. `iconv -f [source encoding] -t UTF-8 [source file] > [destination file]`).
 
+### Warnings and errors
+The generated `org.xtext.example.mydsl.generator.Main` class will not produce sources when one or more validation warnings are present in your DSL. This behavior is different from running it from within Eclipse, where the sources will be produced if there are one or more validation warnings.
+
+To change this behavior, it is necessary to modify `org.xtext.example.mydsl/src/org/xtext/example/mydsl/generator/Main.xtend`, which is generated after the first run. Change the section near line 44 to match below (but feel free to change it to your own needs):
+
+```java
+    // Validate the resource
+    val issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl)
+    if (!issues.empty) {
+        issues.forEach[System.err.println(it)]
+    }
+
+    // Exit on error
+    val errors = issues.filter[it.severity == Severity.ERROR]
+    if (!errors.empty) {
+        return;
+    }
+```
+
+Changes to this file will not be overwritten.
+
 ## References
 The design and implementation of the standalone module was inspired by two other projects.
 
